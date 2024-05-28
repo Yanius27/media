@@ -26,16 +26,19 @@ export default class App {
     this.recordListener();
   }
 
+// Load coords after restart
   initCoords() {
     if (!this._coords && localStorage.getItem('coords')) {
       this._coords = JSON.parse(localStorage.getItem('coords'));
     }
   }
 
+// Creating storage for coords
   saveCoords() {
     localStorage.setItem('coords', JSON.stringify(this._coords));
   }
 
+// Method for getting coords from user  
   getCoords() {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
@@ -54,7 +57,7 @@ export default class App {
     });
   }
 
-
+// Method for creating new card
   async createCard(content, type, coords) {
       try {
         if (!coords) {
@@ -194,7 +197,7 @@ export default class App {
     
     this.popup.querySelector('.popup_form').addEventListener('submit', (e) => {
       e.preventDefault(); 
-      this.checkInput(e.target.querySelector('.popup_input').value);
+      this.checkInput(e.target.querySelector('.popup_input').value, this.actualContentType);
     });
   }
 
@@ -240,22 +243,19 @@ export default class App {
   }
 
 // Проверка корректности введённых пользователем вручную координат
-  checkInput(value) {
+  checkInput(value, type) {
     try {
-      if(document.forms[0].checkValidity()) {
+      if(this.input.checkValidity()) {
         this.popup.remove();
-        this._coords = value.replace(/[\[\]\s]/g, '').split(',');
+        this._coords = value.replace(/[\[\]\s]/g, '').split(','); 
         this.saveCoords();
 
-        if (this.actualContentType !== 'text') {
-          this.createCard(this.blob, this.actualContentType, this._coords);
+        if (type !== 'text') {
+          this.createCard(this.blob, type, this._coords);
         } else {
-          this.createCard(this.input.value, this.actualContentType, this._coords);
+          this.createCard(this.input.value, type, this._coords);
         }          
       } else {
-        // const error = new ErrorMessage('Введите корректное значение координат.');
-        // document.forms[0].append(error.element);
-        // setTimeout(() => error.element.remove(), 3000);
         throw new Error('Введите корректное значение координат.');
       }
     } catch (error) {
@@ -266,6 +266,7 @@ export default class App {
         this.input.setCustomValidity('');
         this.input.reportValidity();
       }, 3000);
+      // throw new Error(error.message);
     }
   }
 }
