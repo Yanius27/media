@@ -81,7 +81,7 @@ export default class App {
       }
   }  
 
-// Колбэк для обработки событий, возникающих во время записи аудио и видео  
+// Cb for event handling, arising while recording audio or video
   recordListener() {
     [...document.querySelectorAll('.btn')].forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -100,7 +100,7 @@ export default class App {
     });
   }
 
-// Метод создающий таймер и setInterval для его ежесекундного обновления  
+// Method creating timer and setInterval for every second update  
   timer() {
     const startTimer = new Date();
 
@@ -124,7 +124,7 @@ export default class App {
     };
   }
 
-// Колбэк для обработчика событий происходящих на инпуте для создания сообщения (текст, аудио, видео)   
+// Cb for event handling, arising on the input for creating message (text, audio, video)   
   messageListener() {
     this.input.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter' && this.input.value !== '') {
@@ -186,7 +186,7 @@ export default class App {
     });
   }
 
-// Колбэк для обработчика событий popup элемента
+// Cb for popup elements event handler
   popupListener() {
     this.popup.querySelector('.popup_buttons').addEventListener('click', (e) => {
       if (e.target.classList.contains('popup_cancelBtn')) {
@@ -201,7 +201,7 @@ export default class App {
     });
   }
 
-// Колбэк для обрабочтика событий клавиш Play внутри карточек
+// Cb for event handler for Play button inside cards
   messagePlayerListener(event) {
     const card = event.target.closest('.card');
     const media = card.querySelector('.media');
@@ -217,7 +217,7 @@ export default class App {
     }
   }
 
-// Метод для прослушивания событий медиа внутри карточек
+// Method for listening events on media inside cards
   mediaListener(card) {
     const media = card.querySelector('.media');
     const playBtn = card.querySelector('.play-button');
@@ -242,7 +242,7 @@ export default class App {
     });
   }
 
-// Проверка корректности введённых пользователем вручную координат
+// Checking the correctness of coordinates entered manually by the user
   checkInput(value, type) {
     try {
       if(this.input.checkValidity()) {
