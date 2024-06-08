@@ -1,8 +1,10 @@
 import MediaControls from './MediaControls';
+import moment from 'moment';
 
 export default class Card {
   constructor(content, type, coords) {
     this._content = content;
+    this.contentContainer;
     this._type = type;
     this._coords = coords;
     this._element;
@@ -13,13 +15,8 @@ export default class Card {
   }
 
   #setDate() {
-    const date = new Date();
-    const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-    const month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1;
-    const year = date.getFullYear();
-    const hour = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-    const minute = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    this._currentDate = `${day}.${month}.${year} ${hour}:${minute}`; 
+    const date = moment().locale('ru');
+    this._currentDate = date.format('DD.MM.YY HH:mm');
   }
 
 
@@ -30,33 +27,23 @@ export default class Card {
     const flex = document.createElement('div');
     flex.classList.add('flex');
 
-    const content = document.createElement('div');
-    content.classList.add('content');
-
-    if (this._type === 'text') {
-      content.textContent = this._content;
-    } else if (this._type === 'video') {
-      const video = document.createElement('video');
-      video.classList.add('media');
-      video.classList.add('videoFile');
-      const customControls = new MediaControls(video, 'video').element;
-      video.setAttribute('poster', 'https://img.freepik.com/free-photo/white-background_23-2147730801.jpg');
-      video.src = URL.createObjectURL(this._content);
-      content.append(video, customControls);
-    } else {
-      const audio = document.createElement('audio');
-      audio.classList.add('media');
-      audio.classList.add('audioFile');
-      const customControls = new MediaControls(audio, 'audio').element;
-      audio.src = URL.createObjectURL(this._content);
-      content.append(audio, customControls);
+    switch (this._type) {
+      case 'text':
+        this.#createTextCard();
+        break;
+      case 'video':
+        this.#createVideoCard();
+        break;
+      case 'audio':
+        this.#createAudioCard();
+        break;
     }
 
     const date = document.createElement('span');
     date.classList.add('date');
     date.textContent = this._currentDate;
 
-    flex.append(content, date);
+    flex.append(this.contentContainer, date);
 
     const coords = document.createElement('span');
     coords.classList.add('coords');
@@ -66,6 +53,63 @@ export default class Card {
     card.append(flex, coords);
 
     this._element = card;
+  }
+
+  #createTextCard() {
+    this.contentContainer = document.createElement('div');
+    this.contentContainer.classList.add('content');
+
+    this.contentContainer.textContent = this._content;
+  }
+
+  #createVideoCard() {
+    this.contentContainer = document.createElement('div');
+    this.contentContainer.classList.add('content');
+
+    const video = document.createElement('video');
+
+    video.classList.add('media');
+    video.classList.add('videoFile');
+    const customControls = new MediaControls(video, 'video').element;
+    video.setAttribute('poster', 'https://img.freepik.com/free-photo/white-background_23-2147730801.jpg');
+    video.src = URL.createObjectURL(this._content);
+    this.contentContainer.append(video, customControls);
+  }
+
+  #createAudioCard() {
+    this.contentContainer = document.createElement('div');
+    this.contentContainer.classList.add('content');
+
+    const audio = document.createElement('audio');
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.#blobToArrayBuffer(this._content).then(buffer => {
+      audioContext.decodeAudioData(buffer, (_buffer) => {
+        const duration = _buffer.duration;
+        console.log('duration -->' + duration);
+      })
+    })
+
+    audio.classList.add('media');
+    audio.classList.add('audioFile');
+    const customControls = new MediaControls(audio, 'audio').element;
+    audio.src = URL.createObjectURL(this._content);
+    this.contentContainer.append(audio, customControls);
+  }
+
+  #blobToArrayBuffer(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        resolve(event.target.result);
+      }
+
+      reader.onerror = (event) => {
+        reject('Error reading Blob as ArrayBuffer');
+      }
+
+      reader.readAsArrayBuffer(blob);
+    })
   }
 
   get element() {

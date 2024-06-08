@@ -266,7 +266,6 @@ export default class App {
         this.input.setCustomValidity('');
         this.input.reportValidity();
       }, 3000);
-      // throw new Error(error.message);
     }
   }
 }
